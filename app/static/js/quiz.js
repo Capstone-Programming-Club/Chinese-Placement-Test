@@ -5,6 +5,37 @@ document.addEventListener('DOMContentLoaded', function() {
     $('input[name="level"]').on('change', function() {
         $('#start-btn').show();
     });
+
+    const timerDisplay = document.getElementById('timer');
+    let timeRemaining;
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
+    function startTimer() {
+        const timerInterval = setInterval(() => {
+            timeRemaining--;
+            updateTimerDisplay();
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                submitQuiz();
+            }
+        }, 1000);
+    }
+
+    fetch('/quiz/get_remaining_time')
+        .then(response => response.json())
+        .then(data => {
+            timeRemaining = data.remaining_time;
+            updateTimerDisplay();
+            startTimer();
+        })
+        .catch(error => console.error('Error fetching remaining time:', error));
+
+    showQuestion(currentQuestion);
 });
 
 

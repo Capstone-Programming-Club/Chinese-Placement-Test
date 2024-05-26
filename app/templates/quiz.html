@@ -39,6 +39,7 @@
                 <button type="button" class="btn btn-secondary" onclick="showQuestion({{ loop.index0 }})">Question {{ loop.index0 + 1 }}</button>
             {% endfor %}
         </div>
+        <div id="timer">60:00</div>
         <div class="container text-center mt-5">
             {% set idx = namespace(value=0) %}
             {% for question in questions %}

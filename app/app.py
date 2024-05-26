@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, make_response
+from datetime import datetime, timedelta
 import json
 import sqlite3
 
@@ -13,6 +14,7 @@ with open('questions.json', 'r') as file:
 
 userlevel = dict()
 userquestions = dict()
+userstarttime = dict()
 
 def init_db():
     conn = sqlite3.connect('quiz.db')
@@ -55,6 +57,17 @@ def login():
     
     return render_template('login.html')
 
+@app.route('/quiz/get_remaining_time')
+def get_remaining_time():
+    username = session.get('username')
+    if username not in userstarttime:
+        return redirect('/quiz')
+    starttime = userstarttime[username]
+    endtime = starttime + timedelta(seconds=10)
+    time = max(0,(endtime - datetime.now()).total_seconds())
+    print(time)
+    return {'remaining_time': int(time)}
+
 
 @app.post('/quiz/start')
 def start_quiz():
@@ -62,7 +75,9 @@ def start_quiz():
     if level not in [ 'level 1-2' , 'level 3-4' ]:
         return redirect('/quiz')
     
-    userlevel[session.get('username')] = level
+    username = session.get('username')
+    userlevel[username] = level
+    userstarttime[username] = datetime.now()
     return redirect('/quiz')
 
 
