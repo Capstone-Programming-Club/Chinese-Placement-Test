@@ -1,0 +1,19 @@
+/* Untoggled button color */
+
+.btn-choices:focus,
+.btn-choices:active {
+    outline: none; /* Remove the outline */
+    box-shadow: none; /* Remove any box shadow */
+}
+
+.btn-choices:not(.active) {
+  background-color: #007bff; /* Change to your desired color */
+  border-color: #007bff; /* Change to your desired color */
+}
+
+
+.btn-choices:not(:disabled):not(.disabled).active{
+  background-color: #00ff55; /* Change to your desired color */
+  border-color: #00ff55; /* Change to your desired color */
+  box-shadow: none;
+}

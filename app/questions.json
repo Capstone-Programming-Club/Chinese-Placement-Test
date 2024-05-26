@@ -1,0 +1,67 @@
+{
+    "name": "Chinese Questions",
+    "Level1": [
+        {
+            "Type": "multi",
+            "Question-Text": "What is the capital of India?",
+            "Sub-Questions": [{
+                "Question": "What is the capital of China?",
+                "Options": ["Beijing", "Shanghai", "Hong Kong", "Shenzhen"],
+                "Answer": "Beijing"
+            },
+            {
+                "Question": "What is the capital of China?",
+                "Options": ["Beijing", "Shanghai", "Hong Kong", "Shenzhen"],
+                "Answer": "Beijing"
+            }]
+        },
+        {
+            "Type": "single",
+            "Question": "What is the capital of China?",
+            "Options": ["Beijing", "Shanghai", "Hong Kong", "Shenzhen"],
+            "Answer": "Beijing"
+        }
+    ],
+    "Level2": [
+        {
+            "Type": "single",
+            "Question": "What is the capital of Japan?",
+            "Options": ["Tokyo", "Osaka", "Kyoto", "Yokohama"],
+            "Answer": "Tokyo"
+        },
+        {
+            "Type": "single",
+            "Question": "What is the capital of South Korea?",
+            "Options": ["Seoul", "Busan", "Incheon", "Daegu"],
+            "Answer": "Seoul"
+        }
+    ],
+    "Level3": [
+        {
+            "Type": "single",
+            "Question": "What is the capital of Thailand?",
+            "Options": ["Bangkok", "Chiang Mai", "Pattaya", "Phuket"],
+            "Answer": "Bangkok"
+        },
+        {
+            "Type": "single",
+            "Question": "What is the capital of Vietnam?",
+            "Options": ["Hanoi", "Ho Chi Minh City", "Da Nang", "Hue"],
+            "Answer": "Hanoi"
+        }
+    ],
+    "Level4": [
+        {
+            "Type": "single",
+            "Question": "What is the capital of Malaysia?",
+            "Options": ["Kuala Lumpur", "Penang", "Johor Bahru", "Ipoh"],
+            "Answer": "Kuala Lumpur"
+        },
+        {
+            "Type": "single",
+            "Question": "What is the capital of Singapore?",
+            "Options": ["Singapore", "Sentosa", "Marina Bay", "Orchard Road"],
+            "Answer": "Singapore"
+        }
+    ]
+}
