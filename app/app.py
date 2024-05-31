@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, session, make_response
+from flask_socketio import SocketIO, send, emit
 from datetime import datetime, timedelta
 import json
 import sqlite3
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'test'
+socketio = SocketIO(app)
 
 QUESTION_MASTER = []
 
@@ -15,6 +17,8 @@ with open('questions.json', 'r') as file:
 userlevel = dict()
 userquestions = dict()
 userstarttime = dict()
+userprogress = dict()
+
 
 def init_db():
     conn = sqlite3.connect('quiz.db')
@@ -29,16 +33,48 @@ def init_db():
             predicted_level INTEGER NOT NULL
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS UserProgress (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            progress TEXT NOT NULL
+        )
+    ''')
     conn.commit()
     conn.close()
 
 
+
+def update_user_progress(username, progress):
+    conn = sqlite3.connect('quiz.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM UserProgress WHERE username = ?', (username,))
+    user = cursor.fetchone()
+    if user is None:
+        cursor.execute('INSERT INTO UserProgress (username, progress) VALUES (?, ?)', (username, progress))
+    else:
+        cursor.execute('UPDATE UserProgress SET progress = ? WHERE username = ?', (progress, username))
+    conn.commit()
+    conn.close()
+    socketio.emit('progress', {'username': username, 'progress': progress})
     
+
+
 def login_required(func):
     def wrapper(*args, **kwargs):
         if 'username' not in session:
-            return redirect(url_for('login'))
+            return redirect('/login')
         return func(*args, **kwargs)
+    return wrapper
+
+def admin_required(func):
+    def wrapper(*args, **kwargs):
+        if 'username' not in session:
+            return redirect('/login')
+        if session['username'] != 'admin':
+            return redirect('/')
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
     return wrapper
 
 
@@ -53,9 +89,18 @@ def login():
         if username is None:
             return redirect('/login')
         session['username'] = username
+        if username == 'admin':
+            return redirect('/dashboard')
+        
+        update_user_progress(username, "Signed In")
         return redirect('/quiz')
     
     return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect('/')
 
 @app.route('/quiz/get_remaining_time')
 def get_remaining_time():
@@ -77,6 +122,7 @@ def start_quiz():
     
     username = session.get('username')
     userlevel[username] = level
+    update_user_progress(username, "In Progress")
     userstarttime[username] = datetime.now()
     return redirect('/quiz')
 
@@ -94,6 +140,7 @@ def grade(correct, total, level):
 @app.post('/quiz/submit')
 def submit_quiz():
     username = session.get('username')
+    update_user_progress(username, "Completed")
     answers = request.form.getlist('answers')
     if username not in userquestions:
         return redirect('/quiz')
@@ -164,14 +211,25 @@ def quiz():
     userquestions[username] = questions
     return render_template('quiz.html', levelselect= True , questions=questions)
 
+@app.get('/dashboard')
+@admin_required
+def dashboard():
+    conn = sqlite3.connect('quiz.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT username, progress FROM UserProgress')
+    progress = cursor.fetchall()
+    conn.close()
+    return render_template('dashboard.html', progress=progress)
+
 @app.route('/leaderboard')
 def leaderboard():
     conn = sqlite3.connect('quiz.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT username, score FROM UserScore ORDER BY score DESC')
+    cursor.execute('SELECT username, score, level, predicted_level FROM UserScore ORDER BY score DESC')
     scores = cursor.fetchall()
     conn.close()
     return render_template('leaderboard.html', scores=scores)
+    
 
 @app.route('/scores')
 def scores():
@@ -188,4 +246,5 @@ def add_header(response):
 if __name__ == '__main__':
     init_db()
     #init_questions()
-    app.run(debug=True, port=6868)
+    #pp.run(debug=True, port=6868)
+    socketio.run(app, debug=True, port=6868)
